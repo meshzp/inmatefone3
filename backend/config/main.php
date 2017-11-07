@@ -11,7 +11,17 @@ return [
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
-    'modules' => [],
+    'modules' => [
+        // Connectivity this module
+        'tickets' => [
+            'class' => 'vityachis\tickets\Module',
+            'defaultDirDownload' => '@backend/web/ticket_attached_files',
+        ],
+        // To work properly a \kartik\grid\GridView
+        'gridview' => [
+            'class' => 'kartik\grid\Module',
+        ],
+    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-backend',
