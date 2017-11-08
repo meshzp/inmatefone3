@@ -43,9 +43,9 @@ class Termination extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getClientTransaction()
+    public function getCountryCode()
     {
-        return $this->hasOne(CountrCode::className(), ['country_id' => 'country_id']);
+        return $this->hasOne(CountryCode::className(), ['country_id' => 'country_id']);
     }
 
     /**
