@@ -5,7 +5,6 @@ namespace backend\helpers;
 use Yii;
 use yii\helpers\Console;
 
-
 /**
  * Class Globals
  * @package backend\helpers
@@ -49,15 +48,20 @@ class Globals
     /**
      * @deprecated
      * Shortcut to strip everything but numbers from a string
+     *
      * @param string $number The string
+     * @param string $extraCharacters
+     *
      * @return string The formatted string containing numbers only
      */
-    public static function numbersOnly($number,$extraCharacters = '') {
-        return preg_replace("/[^0-9$extraCharacters]/", "", $number);
+    public static function numbersOnly($number, $extraCharacters = '')
+    {
+        return preg_replace('/[^0-9' . $extraCharacters . ']/', '', $number);
     }
 
     /**
      * @deprecated
+     *
      * @param $value
      * @param string $key1
      * @param string $key2
@@ -77,6 +81,7 @@ class Globals
 
     /**
      * @deprecated
+     *
      * @param $value
      * @param string $key1
      * @param string $key2
@@ -93,5 +98,20 @@ class Globals
         $decrypttext = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5($key1), $crypttext, MCRYPT_MODE_ECB, md5($key2));
 
         return trim($decrypttext);
+    }
+
+    /**
+     * @deprecated
+     * Shortcut to retrieve the csrf token name and token
+     *
+     * @param bool $asArray true to output as array. False will output a string
+     *
+     * @return mixed The token name and token as array or string
+     */
+    public static function csrf($asArray = false)
+    {
+        return $asArray
+            ? [Yii::$app->request->csrfParam => Yii::$app->request->getCsrfToken()]
+            : Yii::$app->request->csrfParam . '=' . Yii::$app->request->csrfToken;
     }
 }
