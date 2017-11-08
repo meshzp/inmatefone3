@@ -4,8 +4,10 @@ namespace backend\models;
 
 use backend\helpers\Globals;
 use Yii;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\base\Exception;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "transaction_fd".
@@ -49,10 +51,12 @@ use yii\base\Exception;
  * @property string $retrieval_ref_no
  * @property string $ctr
  * @property integer $user_transaction_id
+ *
+ * @property Client $client
+ * @property ClientTransaction $clientTransaction
  */
 class TransactionFd extends ActiveRecord
 {
-
     public $static_key; // the static key used for encryption
     public $refundComment; // amount and comment used in void and refund forms
     public $refundAmount; // amount and comment used in dispute form
@@ -182,6 +186,7 @@ class TransactionFd extends ActiveRecord
     }
 
     /**
+     * @deprecated
      * Charge a card via First Data payment gateway
      *
      * @param $clientId int
@@ -338,7 +343,7 @@ class TransactionFd extends ActiveRecord
                         // TODO: think about whether it's safe enough to allow an update trigger on the user_transactions table to allow processing after initial insert
                         // TODO: what do we do if any of the following db updates fail?
                         if ($clientTransactionModel->reason != 'Journal Entry Payment') {
-                            $clientModel->user_balance = new CDbExpression('user_balance + :creditUpdate', [':creditUpdate' => $params['amount']]);
+                            $clientModel->user_balance = new Expression('user_balance + :creditUpdate', [':creditUpdate' => $params['amount']]);
                             $clientModel->save(false, ['user_balance']);
                             $clientModel->refresh();
                         }
@@ -370,15 +375,15 @@ class TransactionFd extends ActiveRecord
                         }
                     } elseif ($response->transaction_error) {
                         // there was a processing error
-                        flash('error', 'There was an error while processing your transaction.');
-                        flash('error', $response->exact_resp_code . ' ' . $response->exact_message);
+                        Globals::setFlash('error', 'There was an error while processing your transaction.');
+                        Globals::setFlash('error', $response->exact_resp_code . ' ' . $response->exact_message);
                         // no need to save anything in the client transaction model as it will show a failed transaction from the initial save
                     } else {
                         // card was declined
                         $declinedMsg1 = $public ? 'The card was declined and we are unable to process the transaction. Please contact your financial institution.' : 'The card was declined.';
                         $declinedMsg2 = $public ? 'Transaction Not Approved ' . $response->bank_resp_code : $response->bank_resp_code . ' ' . $response->bank_message;
-                        flash('error', $declinedMsg1);
-                        flash('error', $declinedMsg2);
+                        Globals::setFlash('error', $declinedMsg1);
+                        Globals::setFlash('error', $declinedMsg2);
 
                         // update the Client Transaction model to show it was a declined transaction
                         $clientTransactionModel->comment = 'DECLINED';
@@ -399,7 +404,7 @@ class TransactionFd extends ActiveRecord
                                 $clientBillingModel->flagged_count    = $clientBillingModel->flagged_count + 1;
                                 $clientBillingModel->save(false, ['flagged', 'flagged_by', 'flagged_reason', 'flagged_datetime', 'flagged_count']);
                                 if (!$public && $clientBillingModel->flagged == 2) {
-                                    flash('error', 'The card has been flagged as unusable to stop future use.');
+                                    Globals::setFlash('error', 'The card has been flagged as unusable to stop future use.');
                                 }
                             }
                             unset($clientBillingModel);
@@ -417,33 +422,19 @@ class TransactionFd extends ActiveRecord
                     $clientTransactionModel->comment = 'FAILED - TRY AGAIN';
                     $clientTransactionModel->save(false, ['comment']);
                     $message = 'Error connecting to the payment processor. Please try again in a few minutes. If you repeatedly see this message, please contact support.';
-                    if (Yii::app() instanceof CConsoleApplication) {
-                        throw new Exception($message);
-                    } else {
-                        flash('error', $message);
-                    }
-                    //return false;
+                    Globals::setFlash('error', $message);
                 }
             } else {
                 // error saving initial transaction model
                 $clientTransactionModel->comment = 'FAILED - TRY AGAIN';
                 $clientTransactionModel->save(false, ['comment']);
                 $message = 'Error saving to transactions table: ' . CHtml::errorSummary($transactionModel);
-                if (Yii::app() instanceof CConsoleApplication) {
-                    throw new Exception($message);
-                } else {
-                    flash('error', $message);
-                }
-                //return false;
+                Globals::setFlash('error', $message);
             }
         } else {
             // error saving initial client transaction model
             $msg = 'Error Saving Client Transaction Record. ' . CHtml::errorSummary($clientTransactionModel);
-            if (Yii::app() instanceof CConsoleApplication) {
-                echo $msg;
-            } else {
-                flash('error', $msg);
-            }
+            Globals::setFlash('error', $msg);
         }
 
         // something went wrong
@@ -451,17 +442,7 @@ class TransactionFd extends ActiveRecord
     }
 
     /**
-     * @return array relational rules.
-     */
-    public function relations()
-    {
-        return [
-            'client'            => [self::BELONGS_TO, 'Client', 'user_id'],
-            'clientTransaction' => [self::BELONGS_TO, 'ClientTransaction', 'user_transaction_id'],
-        ];
-    }
-
-    /**
+     * @deprecated
      * Retrieves a list of models based on the current search/filter conditions.
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
@@ -516,6 +497,7 @@ class TransactionFd extends ActiveRecord
     }
 
     /**
+     * @deprecated
      * The following function is for voids and refunds on the currently loaded transaction model
      *
      * @param bool $doVoid Use void rather than refund?
@@ -653,18 +635,14 @@ class TransactionFd extends ActiveRecord
                         ClientStatus::process($clientId, 'Refund');
                     } elseif ($response->transaction_error) {
                         // there was a processing error
-                        flash('error', 'There was an error while processing your transaction.');
-                        flash('error', $response->exact_resp_code . ' ' . $response->exact_message);
+                        Globals::setFlash('error', 'There was an error while processing your transaction.');
+                        Globals::setFlash('error', $response->exact_resp_code . ' ' . $response->exact_message);
                         // no need to save anything in the client transaction model as it will show a failed transaction from the initial save
                     } else {
                         // transaction not approved
-                        flash('error', 'The transaction was not approved.');
-                        flash('error', $response->bank_resp_code . ' ' . $response->bank_message);
+                        Globals::setFlash('error', 'The transaction was not approved.');
+                        Globals::setFlash('error', $response->bank_resp_code . ' ' . $response->bank_message);
                         // no need to save anything in the client transaction model as it will show a failed transaction from the initial save
-
-                        // update the Client Transaction model to show it was a declined transaction
-                        //$clientTransactionModel->comment = 'DECLINED';
-                        //$clientTransactionModel->save(false, array('comment'));
                     }
 
                     // return the approved value and ctr (which should be displayed to the customer if appropriate)
@@ -681,7 +659,7 @@ class TransactionFd extends ActiveRecord
                     if (Yii::app() instanceof CConsoleApplication) {
                         throw new Exception($message);
                     } else {
-                        flash('error', $message);
+                        Globals::setFlash('error', $message);
                     }
                     //return false;
                 }
@@ -690,21 +668,12 @@ class TransactionFd extends ActiveRecord
                 $clientTransactionModel->comment = 'FAILED - TRY AGAIN';
                 $clientTransactionModel->save(false, ['comment']);
                 $message = 'Error saving to transactions table: ' . CHtml::errorSummary($transactionModel);
-                if (Yii::app() instanceof CConsoleApplication) {
-                    throw new Exception($message);
-                } else {
-                    flash('error', $message);
-                }
-                //return false;
+                Globals::setFlash('error', $message);
             }
         } else {
             // error saving initial client transaction model
             $msg = 'Error Saving Client Transaction Record. ' . CHtml::errorSummary($clientTransactionModel);
-            if (Yii::app() instanceof CConsoleApplication) {
-                echo $msg;
-            } else {
-                flash('error', $msg);
-            }
+            Globals::setFlash('error', $msg);
         }
 
         // something went wrong
@@ -712,6 +681,7 @@ class TransactionFd extends ActiveRecord
     }
 
     /**
+     * @deprecated
      * Reverses the referral after a refund/dispute
      *
      * @param int $transactionId The client transaction id of the original credit purchase that created the referral
@@ -742,11 +712,7 @@ class TransactionFd extends ActiveRecord
                 $tx->save(false, ['reversed_by']);
             } else {
                 $msg = 'Error Saving Client Referral Reversal Transaction Record. ' . CHtml::errorSummary($clientTransactionModel);
-                if (Yii::app() instanceof CConsoleApplication) {
-                    echo $msg;
-                } else {
-                    flash('error', $msg);
-                }
+                Globals::setFlash('error', $msg);
             }
             unset($clientTransactionModel);
             // at this point, the update user balance trigger should run and update the client's balance and the new_balance field
@@ -756,6 +722,12 @@ class TransactionFd extends ActiveRecord
         }
     }
 
+    /**
+     * @deprecated
+     * @param bool $close
+     *
+     * @throws Exception
+     */
     public function dispute($close = false)
     {
         if ($this->isNewRecord) {
@@ -799,9 +771,6 @@ class TransactionFd extends ActiveRecord
                 $clientTransactionModel->credit_update        = $this->amount;
                 $clientTransactionModel->reason               = strstr($this->clientTransaction->reason, 'Journal Entry') ? 'Journal Entry Dispute' : 'Dispute';
                 $clientTransactionModel->comment              = 'TX#' . $this->clientTransaction->transaction_id . ' Ref:' . $this->clientTransaction->dispute->ref . ' (Dispute Won)'; //$params['comment'];
-                //                if(!empty($this->disputeComment)) {
-                //                    $clientTransactionModel->comment .= ' '.$this->disputeComment;
-                //                }
                 // if no billing id (profile id) flag as a quick pay
                 // note: not sure if this is the correct use of the quick_pay field but it doesn't seem to be used for anything else now
                 $clientTransactionModel->quick_pay = $this->clientTransaction->quick_pay;
@@ -864,6 +833,22 @@ class TransactionFd extends ActiveRecord
                 throw new Exception('Error saving dispute fee.');
             }
         }
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getClient()
+    {
+        return $this->hasOne(Client::className(), ['user_id' => 'user_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getClientTransaction()
+    {
+        return $this->hasOne(Client::className(), ['id' => 'user_transaction_id']);
     }
 
 }
