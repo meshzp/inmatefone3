@@ -31,5 +31,10 @@ return [
             ],
         ],
     ],
+    'modules' => [
+        'rbacadmin' => [
+            'class' => 'dieruckus\rbacadmin\Module',
+        ],
+    ],
     'params' => $params,
 ];

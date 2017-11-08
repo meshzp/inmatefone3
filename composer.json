@@ -17,8 +17,9 @@
         "php": ">=5.4.0",
         "yiisoft/yii2": "~2.0.6",
         "yiisoft/yii2-bootstrap": "~2.0.0",
+        "vityachis/yii2-tickets": "dev-master",
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
-        "vityachis/yii2-tickets": "dev-master"
+        "dieruckus/yii2-rbac-admin": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",
@@ -32,7 +33,10 @@
         "store-auths": "true",
         "discard-changes": "true",
         "bitbucket-oauth": {
-
+            "bitbucket.org": {
+                "consumer-key": "SWcjADNfDWn6XGGZV5",
+                "consumer-secret": "5rF4u44sYZTvtQgnuxDcZ2DucuWVgz2a"
+            }
         }
     },
     "repositories": [
@@ -43,6 +47,10 @@
         {
             "type": "vcs",
             "url": "https://bitbucket.org/se135/yii2-tickets.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://artem_khodos@bitbucket.org/se135/yii2-rbac-admin.git"
         }
     ]
 }
