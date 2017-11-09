@@ -419,7 +419,7 @@ class Hlr extends ActiveRecord
                 return 'The number (' . $number . ') is not valid';
             }
 
-            $e164   asdsadsadas    = $phoneUtil->format($numberProto, \libphonenumber\PhoneNumberFormat::E164);
+            $e164       = $phoneUtil->format($numberProto, \libphonenumber\PhoneNumberFormat::E164);
             $regionCode = $phoneUtil->getRegionCodeForNumber($numberProto);
             $type       = $phoneUtil->getNumberType($numberProto);
 
