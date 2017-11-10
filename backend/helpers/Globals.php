@@ -94,4 +94,42 @@ class Globals
 
         return trim($decrypttext);
     }
+
+    /**
+     * TODO: Не понятно как изменить правильно этот метод
+     * @deprecated
+     * @return stdClass
+     */
+    public static function user()
+    {
+        // return system user if we are in the console
+        if (Yii::app() instanceof CConsoleApplication) {
+            // allow console commands and related models to fetch the user id
+            $user     = new stdClass();
+            $user->id = 1;
+
+            return $user;
+        }
+        // return client user if we are in a consumer site
+        if (!SITE_ADMIN) {
+            // allow consumer sites and related models to fetch the user id as client
+            $user     = new stdClass();
+            $user->id = 0;
+
+            return $user;
+        }
+
+        return Yii::app()->getUser();
+    }
+
+    /**
+     * @deprecated
+     * @return string
+     */
+    public static function uniqueMd5()
+    {
+        mt_srand(microtime(true) * 100000 + memory_get_usage(true));
+
+        return md5(uniqid(mt_rand(), true));
+    }
 }
