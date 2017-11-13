@@ -50,7 +50,7 @@
         },
         {
             "type": "vcs",
-            "url": "https://artem_khodos@bitbucket.org/se135/yii2-rbac-admin.git"
+            "url": "https://bitbucket.org/se135/yii2-rbac-admin.git"
         }
     ]
 }
