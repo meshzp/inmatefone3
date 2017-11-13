@@ -110,6 +110,7 @@ class Currency extends ActiveRecord
     }
 
     /**
+     * @deprecated
      * @param $currencyPrefix
      *
      * @return null
@@ -125,6 +126,7 @@ class Currency extends ActiveRecord
     }
 
     /**
+     * @deprecated
      * @return mixed
      */
     public function getCurrencySymbols()
