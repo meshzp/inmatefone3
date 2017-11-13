@@ -5,7 +5,6 @@ namespace backend\helpers;
 use Yii;
 use yii\helpers\Console;
 
-
 /**
  * Class Globals
  * @package backend\helpers
@@ -97,5 +96,20 @@ class Globals
     public static function unique_md5() {
         mt_srand(microtime(true) * 100000 + memory_get_usage(true));
         return md5(uniqid(mt_rand(), true));
+    }
+
+    /**
+     * @deprecated
+     * Shortcut to retrieve the csrf token name and token
+     *
+     * @param bool $asArray true to output as array. False will output a string
+     *
+     * @return mixed The token name and token as array or string
+     */
+    public static function csrf($asArray = false)
+    {
+        return $asArray
+            ? [Yii::$app->request->csrfParam => Yii::$app->request->getCsrfToken()]
+            : Yii::$app->request->csrfParam . '=' . Yii::$app->request->csrfToken;
     }
 }
