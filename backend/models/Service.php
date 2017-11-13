@@ -2,8 +2,10 @@
 
 namespace backend\models;
 
-use Yii;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
+
 /**
  * This is the model class for table "services".
  *
@@ -48,6 +50,10 @@ class Service extends ActiveRecord
         ];
     }
 
+    /**
+     * @deprecated
+     * @return array
+     */
     public function scopes()
     {
         return [
@@ -62,28 +68,28 @@ class Service extends ActiveRecord
 
     /**
      * Retrieves a list of models based on the current search/filter conditions.
-     * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
+     * @return ActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
     public function search()
     {
-        // Warning: Please modify the following code to remove attributes that
-        // should not be searched.
+        $query = new ActiveQuery();
+        $query->compare('service_id', $this->service_id, true);
+        $query->compare('service_name', $this->service_name, true);
+        $query->compare('service_status', $this->service_status);
 
-        $criteria = new CDbCriteria;
-
-        $criteria->compare('service_id', $this->service_id, true);
-        $criteria->compare('service_name', $this->service_name, true);
-        $criteria->compare('service_status', $this->service_status);
-
-        return new CActiveDataProvider($this, [
-            'criteria' => $criteria,
+        return new ActiveDataProvider($this, [
+            'query' => $query,
         ]);
     }
 
+    /**
+     * @deprecated
+     * @return mixed
+     */
     public function getServiceList()
     {
         $models  = $this->enabled()->byName()->findAll();
-        $list    = CHtml::listData($models, 'service_id', 'service_name');
+        $list    = Html::map($models, 'service_id', 'service_name');
         $list[0] = 'Other';
 
         return $list;

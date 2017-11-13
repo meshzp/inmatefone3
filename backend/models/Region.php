@@ -3,6 +3,7 @@
 namespace backend\models;
 
 use Yii;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -67,23 +68,21 @@ class Region extends ActiveRecord
     /**
      * @deprecated
      * Retrieves a list of models based on the current search/filter conditions.
-     * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
+     * @return ActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
     public function search()
     {
-        // Warning: Please modify the following code to remove attributes that
-        // should not be searched.
 
-        $criteria = new CDbCriteria;
+        $query = new ActiveQuery();
 
-        $criteria->compare('id', $this->id, true);
-        $criteria->compare('country_id', $this->country_id);
-        $criteria->compare('group_name', $this->group_name, true);
-        $criteria->compare('region_code', $this->region_code, true);
-        $criteria->compare('region_name', $this->region_name, true);
+        $query->filterWhere(['like', 'id', $this->id]);
+        $query->andFilterWhere(['=', 'country_id', $this->country_id]);
+        $query->andFilterWhere(['like', 'group_name', $this->group_name]);
+        $query->andFilterWhere(['like', 'region_code', $this->region_code]);
+        $query->andFilterWhere(['like', 'region_name', $this->region_name]);
 
-        return new CActiveDataProvider($this, [
-            'criteria' => $criteria,
+        return new ActiveDataProvider([
+            'query' => $query,
         ]);
     }
 
