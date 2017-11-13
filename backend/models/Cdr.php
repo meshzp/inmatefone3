@@ -86,9 +86,10 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
             [['termination_type'], 'max' => 40],
             [['destination', 'destination_dialed', 'cli', 'cli2', 'duration_reports', 'disposition', 'uuid', 'token'], 'max' => 255],
             [['termination_rate', 'billed', 'minute_charge', 'connect_charge'], 'max' => 10],
+            [['start_datetime', 'answered_datetime', 'end_datetime', 'datetime'], 'safe'],
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            [['cdr_id', 'currency', 'user_id', 'facility_id', 'sip_id', 'didFilter', 'did_id', 'rate_center_id', 'termination_id', 'termination_type', 'country_id', 'destination', 'destination_dialed', 'cli', 'cli2', 'start_datetime', 'answered_datetime', 'end_datetime', 'datetime', 'billsec', 'duration', 'duration_reports', 'termination_rate', 'billing', 'billed', 'minute_charge', 'connect_charge', 'disposition', 'uuid', 'dtmf', 'fromDatetime', 'toDatetime', 'vm_detected', 'name', 'orig_cli', 'account_code'], 'safe'],
+            [['cdr_id', 'currency', 'user_id', 'facility_id', 'sip_id', 'didFilter', 'did_id', 'rate_center_id', 'termination_id', 'termination_type', 'country_id', 'destination', 'destination_dialed', 'cli', 'cli2', 'start_datetime', 'answered_datetime', 'end_datetime', 'billsec', 'duration', 'duration_reports', 'termination_rate', 'billing', 'billed', 'minute_charge', 'connect_charge', 'disposition', 'uuid', 'dtmf', 'fromDatetime', 'toDatetime', 'vm_detected', 'name', 'orig_cli', 'account_code'], 'safe', 'on' => ['search']],
         ];
     }
 
@@ -137,7 +138,8 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
      * Retrieves a list of models based on the current search/filter conditions.
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
-    public function search() {
+    public function search()
+    {
         // Warning: Please modify the following code to remove attributes that
         // should not be searched.
         $criteria = new CDbCriteria;
@@ -147,41 +149,41 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
                             t.duration,t.duration_reports,t.termination_rate,t.billing,t.billed,t.minute_charge,t.connect_charge,t.disposition,
                             t.service_name,t.dtmf,t.audio,t.ip_v4,t.vm_detected,t.orig_cli,clientDid.name AS name,t.account_code';
 
-        $criteria->with = array(
-            'client' => array(
-                'alias' => 'client',
+        $criteria->with = [
+            'client'      => [
+                'alias'  => 'client',
                 'select' => 'client.user_first_name,client.user_last_name',
-            ),
-            'clientSip' => array(
-                'alias' => 'clientSip',
+            ],
+            'clientSip'   => [
+                'alias'  => 'clientSip',
                 'select' => 'clientSip.sip_name, clientSip.sip_user_id',
-            ),
-            'did' => array(
-                'alias' => 'did',
+            ],
+            'did'         => [
+                'alias'  => 'did',
                 'select' => 'did.did, did.country_id ',
-                'with' => array(
-                    'country' => array(
-                        'alias' => 'didCountry',
+                'with'   => [
+                    'country' => [
+                        'alias'  => 'didCountry',
                         'select' => 'didCountry.country_code_alpha_3, didCountry.country_name, didCountry.country_phone_code',
-                    )
-                )
-            ),
-            'termination' => array(
-                'alias' => 'termination',
+                    ],
+                ],
+            ],
+            'termination' => [
+                'alias'  => 'termination',
                 'select' => 'termination.termination_country, termination.termination_type, termination.country_id',
-                'with' => array(
-                    'country' => array(
-                        'alias' => 'terminationCountry',
+                'with'   => [
+                    'country' => [
+                        'alias'  => 'terminationCountry',
                         'select' => 'terminationCountry.country_code_alpha_3, terminationCountry.country_name, terminationCountry.country_phone_code',
-                    )
-                )
-            ),
-        );
+                    ],
+                ],
+            ],
+        ];
 
         // add client csr in if search might include user_id # 1
-        if(empty($this->user_id) || $this->user_id == 1) {
-            $criteria->with['clientCsr'] = array(
-                'alias' => 'clientCsr',
+        if (empty($this->user_id) || $this->user_id == 1) {
+            $criteria->with['clientCsr'] = [
+                'alias'  => 'clientCsr',
                 'select' => 'clientCsr.user_id, clientCsr.is_redirect',
                 //'condition' => 'clientCsr.is_redirect = 0',
                 //                'with' => array(
@@ -190,12 +192,12 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
                 //                        'select' => 'clientCsrClient.user_id, clientCsrClient.user_first_name, clientCsrClient.user_last_name',
                 //                    )
                 //                )
-            );
+            ];
         }
 
         // this isn't ideal as it only gets current point in time info rather than when the call was made
         // should really put an extra field in cdrs containing the user_did_id
-        $criteria->join='LEFT OUTER JOIN user_dids clientDid ON t.user_id=clientDid.user_id AND t.did_id = clientDid.did_id AND clientDid.status > 0';
+        $criteria->join = 'LEFT OUTER JOIN user_dids clientDid ON t.user_id=clientDid.user_id AND t.did_id = clientDid.did_id AND clientDid.status > 0';
 
         // TODO: find out why the search is producing dupe rows and remove this grouping when done
         // // note: yii takes care of grouping automatically but still need to check what's going on
@@ -204,40 +206,39 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
         $criteria->compare('t.cdr_id', $this->cdr_id);
         $criteria->limit = 5000; // just in case someone sets to all, would this work?
 
-        if(!empty($this->user_id)) {
-            if(is_numeric(trim($this->user_id)))
+        if (!empty($this->user_id)) {
+            if (is_numeric(trim($this->user_id))) {
                 $criteria->compare('t.user_id', $this->user_id);
-            else
-                $criteria->addcondition("(t.user_id = $this->user_id OR client.user_full_name LIKE '%".$this->user_id."%' OR client.user_inmate_full_name LIKE '%".$this->user_id."%')");
+            } else {
+                $criteria->addcondition("(t.user_id = $this->user_id OR client.user_full_name LIKE '%" . $this->user_id . "%' OR client.user_inmate_full_name LIKE '%" . $this->user_id . "%')");
+            }
         }
 
-        if(!empty($this->start_datetime)) {
-            $dateRange = explode(' - ',$this->start_datetime);
+        if (!empty($this->start_datetime)) {
+            $dateRange = explode(' - ', $this->start_datetime);
             //dumpd($dateRange);
-            if(count($dateRange) == 1 || $dateRange[0] == @$dateRange[1]) {
+            if (count($dateRange) == 1 || $dateRange[0] == @$dateRange[1]) {
                 //dumpd($dateRange);
-                $datetime = date('Y-m-d',  strtotime($dateRange[0]));
-                $dateSql = "(DATE(t.start_datetime) = '$datetime' OR DATE(t.answered_datetime) = '$datetime')";
+                $datetime = date('Y-m-d', strtotime($dateRange[0]));
+                $dateSql  = "(DATE(t.start_datetime) = '$datetime' OR DATE(t.answered_datetime) = '$datetime')";
+            } elseif (count($dateRange) == 2) {
+                $datetimeFrom = date('Y-m-d', strtotime(trim($dateRange[0])));
+                $datetimeTo   = date('Y-m-d', strtotime(trim($dateRange[1])));
+                $dateSql      = "((DATE(t.start_datetime) BETWEEN '$datetimeFrom' AND '$datetimeTo') OR (DATE(t.answered_datetime) BETWEEN '$datetimeFrom' AND '$datetimeTo'))";
+            } else {
+                $dateSql = "(DATE_FORMAT(t.start_datetime,'%Y-%m') = '" . date('Y-m') . "' OR DATE_FORMAT(t.answered_datetime,'%Y-%m') = '" . date('Y-m') . "')";
             }
-            elseif(count($dateRange) == 2) {
-                $datetimeFrom = date('Y-m-d',  strtotime(trim($dateRange[0])));
-                $datetimeTo = date('Y-m-d',  strtotime(trim($dateRange[1])));
-                $dateSql = "((DATE(t.start_datetime) BETWEEN '$datetimeFrom' AND '$datetimeTo') OR (DATE(t.answered_datetime) BETWEEN '$datetimeFrom' AND '$datetimeTo'))";
-            }
-            else
-                $dateSql = "(DATE_FORMAT(t.start_datetime,'%Y-%m') = '".date('Y-m')."' OR DATE_FORMAT(t.answered_datetime,'%Y-%m') = '".date('Y-m')."')";
             $criteria->addcondition($dateSql);
             //dumpd($dateSql);
         }
         //$this->date = date('m/d/Y').' - '.date('m/d/Y');
 
-
         $criteria->compare('t.currency', $this->currency, true);
         //$criteria->compare('t.user_id', $this->user_id);
         $criteria->compare('t.facility_id', $this->facility_id);
         $criteria->compare('t.sip_id', $this->sip_id);
-        if(!empty($this->didFilter)) {
-            $did = q('%'.$this->didFilter.'%');
+        if (!empty($this->didFilter)) {
+            $did = q('%' . $this->didFilter . '%');
             $criteria->addCondition("did.did LIKE $did OR t.service_name LIKE $did");
         }
 
@@ -268,12 +269,12 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
         $criteria->compare('t.dtmf', $this->dtmf, true);
         $criteria->compare('t.account_code', $this->account_code, true);
 
-        $escape = strstr($this->orig_cli,'*') || strstr($this->orig_cli,'?') ? false : true;
-        $criteria->compare('t.orig_cli', $this->orig_cli,true,'AND',$escape);
+        $escape = strstr($this->orig_cli, '*') || strstr($this->orig_cli, '?') ? false : true;
+        $criteria->compare('t.orig_cli', $this->orig_cli, true, 'AND', $escape);
 
         $criteria->compare('clientDid.name', $this->name, true);
 
-        if($this->vm_detected == 'TRUE') {
+        if ($this->vm_detected == 'TRUE') {
             $criteria->compare('t.vm_detected', $this->vm_detected);
             $criteria->compare('t.dtmf', 'none');
         }
@@ -281,33 +282,32 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
         // ignore service.800.nobill
         $criteria->addCondition("t.service_name != 'service.800.nobill' OR t.service_name IS NULL");
 
-
-        $sort = new CSort();
-        $sort->attributes = array(
-            'country_id' => array(
-                'asc' => 'country.country_name ASC',
+        $sort               = new CSort();
+        $sort->attributes   = [
+            'country_id'   => [
+                'asc'  => 'country.country_name ASC',
                 'desc' => 'country.country_name DESC',
-            ),
-            'provider_id' => array(
-                'asc' => 'provider.provider_name ASC',
+            ],
+            'provider_id'  => [
+                'asc'  => 'provider.provider_name ASC',
                 'desc' => 'provider.provider_name DESC',
-            ),
-            'rate_center' => array(
-                'asc' => 'rateCenter.rate_center ASC',
+            ],
+            'rate_center'  => [
+                'asc'  => 'rateCenter.rate_center ASC',
                 'desc' => 'rateCenter.rate_center DESC',
-            ),
-            'user_id' => array(
-                'asc' => 'client.user_full_name ASC',
+            ],
+            'user_id'      => [
+                'asc'  => 'client.user_full_name ASC',
                 'desc' => 'client.user_full_name DESC',
-            ),
-            'clientStatus' => array(
-                'asc' => 'client.user_status ASC',
+            ],
+            'clientStatus' => [
+                'asc'  => 'client.user_status ASC',
                 'desc' => 'client.user_status DESC',
-            ),
-            'name' => array(
-                'asc' => 'clientDid.name ASC',
+            ],
+            'name'         => [
+                'asc'  => 'clientDid.name ASC',
                 'desc' => 'clientDid.name DESC',
-            ),
+            ],
             //            'did_notes' => array(
             //                'asc' => 'did_notes ASC',
             //                'desc' => 'did_notes DESC',
@@ -317,13 +317,13 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
             //                'desc' => 'user_count DESC',
             //            ),
             '*', // this adds all of the other columns as sortable
-        );
+        ];
         $sort->defaultOrder = 't.start_datetime DESC, t.answered_datetime DESC, t.cdr_id DESC';
 
-        return new CActiveDataProvider($this, array(
+        return new CActiveDataProvider($this, [
             'criteria' => $criteria,
-            'sort' => $sort,
-        ));
+            'sort'     => $sort,
+        ]);
     }
 
     /*
@@ -348,7 +348,8 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
      * Retrieves a list of models based on the current search/filter conditions.
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
-    public function searchClientView() {
+    public function searchClientView()
+    {
         // Warning: Please modify the following code to remove attributes that
         // should not be searched.
         $criteria = new CDbCriteria;
@@ -357,38 +358,38 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
                             t.destination,t.destination_dialed,t.cli,t.cli2,t.start_datetime,t.answered_datetime,t.end_datetime,t.billsec, 
                             t.duration,t.duration_reports,t.termination_rate,t.billing,t.billed,t.disposition,t.service_name,clientDid.name AS name';
 
-        $criteria->with = array(
-            'client' => array(
-                'alias' => 'client',
+        $criteria->with = [
+            'client'      => [
+                'alias'  => 'client',
                 'select' => 'client.user_first_name,client.user_last_name',
-            ),
-            'clientSip' => array(
-                'alias' => 'clientSip',
+            ],
+            'clientSip'   => [
+                'alias'  => 'clientSip',
                 'select' => 'clientSip.sip_name, clientSip.sip_user_id',
-            ),
-            'did' => array(
-                'alias' => 'did',
+            ],
+            'did'         => [
+                'alias'  => 'did',
                 'select' => 'did.did, did.country_id ',
-                'with' => array(
-                    'country' => array(
-                        'alias' => 'didCountry',
+                'with'   => [
+                    'country' => [
+                        'alias'  => 'didCountry',
                         'select' => 'didCountry.country_code_alpha_3, didCountry.country_name, didCountry.country_phone_code',
-                    )
-                )
-            ),
-            'termination' => array(
-                'alias' => 'termination',
+                    ],
+                ],
+            ],
+            'termination' => [
+                'alias'  => 'termination',
                 'select' => 'termination.termination_country, termination.termination_type, termination.country_id',
-                'with' => array(
-                    'country' => array(
-                        'alias' => 'terminationCountry',
+                'with'   => [
+                    'country' => [
+                        'alias'  => 'terminationCountry',
                         'select' => 'terminationCountry.country_code_alpha_3, terminationCountry.country_name, terminationCountry.country_phone_code',
-                    )
-                )
-            ),
-        );
+                    ],
+                ],
+            ],
+        ];
 
-        $criteria->join='LEFT OUTER JOIN user_dids clientDid ON t.user_id=clientDid.user_id AND t.did_id = clientDid.did_id AND clientDid.status > 0';
+        $criteria->join = 'LEFT OUTER JOIN user_dids clientDid ON t.user_id=clientDid.user_id AND t.did_id = clientDid.did_id AND clientDid.status > 0';
 
         // TODO: find out why the search is producing dupe rows and remove this grouping when done
         // // note: yii takes care of grouping automatically but still need to check what's going on
@@ -397,53 +398,52 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
         $criteria->compare('t.cdr_id', $this->cdr_id);
         $criteria->limit = 5000; // just in case someone sets to all, would this work?
 
-        if(!empty($this->user_id)) {
-            if(is_numeric(trim($this->user_id)))
+        if (!empty($this->user_id)) {
+            if (is_numeric(trim($this->user_id))) {
                 $criteria->compare('t.user_id', $this->user_id);
-            else
-                $criteria->addcondition("(t.user_id = $this->user_id OR client.user_full_name LIKE '%".$this->user_id."%' OR client.user_inmate_full_name LIKE '%".$this->user_id."%')");
+            } else {
+                $criteria->addcondition("(t.user_id = $this->user_id OR client.user_full_name LIKE '%" . $this->user_id . "%' OR client.user_inmate_full_name LIKE '%" . $this->user_id . "%')");
+            }
         }
 
-        $dateSql = false;
+        $dateSql      = false;
         $datetimeFrom = trim($this->fromDatetime);
-        $datetimeTo = trim($this->toDatetime);
-        if(!empty($datetimeFrom) && !empty($datetimeTo)) {
+        $datetimeTo   = trim($this->toDatetime);
+        if (!empty($datetimeFrom) && !empty($datetimeTo)) {
             $dateSql = "((t.start_datetime BETWEEN :fromDatetime AND :toDatetime) OR (t.answered_datetime BETWEEN :fromDatetime AND :toDatetime))";
-        }
-        elseif(!empty($datetimeFrom)) {
+        } elseif (!empty($datetimeFrom)) {
             $dateSql = "((t.start_datetime > :fromDatetime) OR (t.answered_datetime > :fromDatetime))";
-        }
-        elseif(!empty($datetimeTo)) {
+        } elseif (!empty($datetimeTo)) {
             $dateSql = "((t.start_datetime < :toDatetime) OR (t.answered_datetime < :toDatetime))";
         }
-        if($dateSql) {
+        if ($dateSql) {
             $criteria->addcondition($dateSql);
-            if(!empty($datetimeFrom))
+            if (!empty($datetimeFrom)) {
                 $criteria->params[':fromDatetime'] = $datetimeFrom;
-            if(!empty($datetimeTo))
+            }
+            if (!empty($datetimeTo)) {
                 $criteria->params[':toDatetime'] = $datetimeTo;
+            }
         }
 
-        if(!empty($this->start_datetime)) {
-            $dateRange = explode(' - ',$this->start_datetime);
+        if (!empty($this->start_datetime)) {
+            $dateRange = explode(' - ', $this->start_datetime);
             //dumpd($dateRange);
-            if(count($dateRange) == 1 || $dateRange[0] == @$dateRange[1]) {
+            if (count($dateRange) == 1 || $dateRange[0] == @$dateRange[1]) {
                 //dumpd($dateRange);
-                $datetime = date('Y-m-d',  strtotime($dateRange[0]));
-                $dateSql = "(DATE(t.start_datetime) = '$datetime' OR DATE(t.answered_datetime) = '$datetime')";
+                $datetime = date('Y-m-d', strtotime($dateRange[0]));
+                $dateSql  = "(DATE(t.start_datetime) = '$datetime' OR DATE(t.answered_datetime) = '$datetime')";
+            } elseif (count($dateRange) == 2) {
+                $datetimeFrom = date('Y-m-d', strtotime(trim($dateRange[0])));
+                $datetimeTo   = date('Y-m-d', strtotime(trim($dateRange[1])));
+                $dateSql      = "((DATE(t.start_datetime) BETWEEN '$datetimeFrom' AND '$datetimeTo') OR (DATE(t.answered_datetime) BETWEEN '$datetimeFrom' AND '$datetimeTo'))";
+            } else {
+                $dateSql = "(DATE_FORMAT(t.start_datetime,'%Y-%m') = '" . date('Y-m') . "' OR DATE_FORMAT(t.answered_datetime,'%Y-%m') = '" . date('Y-m') . "')";
             }
-            elseif(count($dateRange) == 2) {
-                $datetimeFrom = date('Y-m-d',  strtotime(trim($dateRange[0])));
-                $datetimeTo = date('Y-m-d',  strtotime(trim($dateRange[1])));
-                $dateSql = "((DATE(t.start_datetime) BETWEEN '$datetimeFrom' AND '$datetimeTo') OR (DATE(t.answered_datetime) BETWEEN '$datetimeFrom' AND '$datetimeTo'))";
-            }
-            else
-                $dateSql = "(DATE_FORMAT(t.start_datetime,'%Y-%m') = '".date('Y-m')."' OR DATE_FORMAT(t.answered_datetime,'%Y-%m') = '".date('Y-m')."')";
             $criteria->addcondition($dateSql);
             //dumpd($dateSql);
         }
         //$this->date = date('m/d/Y').' - '.date('m/d/Y');
-
 
         $criteria->compare('t.currency', $this->currency, true);
         //$criteria->compare('t.user_id', $this->user_id);
@@ -474,45 +474,44 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
         // ignore service.800.nobill
         $criteria->addCondition("t.service_name != 'service.800.nobill' OR t.service_name IS NULL");
 
-
-        $sort = new CSort();
-        $sort->attributes = array(
-            'country_id' => array(
-                'asc' => 'country.country_name ASC',
+        $sort               = new CSort();
+        $sort->attributes   = [
+            'country_id'     => [
+                'asc'  => 'country.country_name ASC',
                 'desc' => 'country.country_name DESC',
-            ),
-            'provider_id' => array(
-                'asc' => 'provider.provider_name ASC',
+            ],
+            'provider_id'    => [
+                'asc'  => 'provider.provider_name ASC',
                 'desc' => 'provider.provider_name DESC',
-            ),
-            'rate_center' => array(
-                'asc' => 'rateCenter.rate_center ASC',
+            ],
+            'rate_center'    => [
+                'asc'  => 'rateCenter.rate_center ASC',
                 'desc' => 'rateCenter.rate_center DESC',
-            ),
-            'user_id' => array(
-                'asc' => 'client.user_full_name ASC',
+            ],
+            'user_id'        => [
+                'asc'  => 'client.user_full_name ASC',
                 'desc' => 'client.user_full_name DESC',
-            ),
-            'clientStatus' => array(
-                'asc' => 'client.user_status ASC',
+            ],
+            'clientStatus'   => [
+                'asc'  => 'client.user_status ASC',
                 'desc' => 'client.user_status DESC',
-            ),
-            'name' => array(
-                'asc' => 'clientDid.name ASC',
+            ],
+            'name'           => [
+                'asc'  => 'clientDid.name ASC',
                 'desc' => 'clientDid.name DESC',
-            ),
-            'start_datetime' => array(
-                'asc' => 't.start_datetime ASC,t.answered_datetime ASC',
+            ],
+            'start_datetime' => [
+                'asc'  => 't.start_datetime ASC,t.answered_datetime ASC',
                 'desc' => 't.start_datetime DESC,t.answered_datetime DESC',
-            ),
+            ],
             '*', // this adds all of the other columns as sortable
-        );
+        ];
         $sort->defaultOrder = 't.cdr_id DESC';
 
-        return new CActiveDataProvider($this, array(
+        return new CActiveDataProvider($this, [
             'criteria' => $criteria,
-            'sort' => $sort,
-        ));
+            'sort'     => $sort,
+        ]);
     }
 
     /**
