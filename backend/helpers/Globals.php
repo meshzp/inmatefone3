@@ -5,7 +5,6 @@ namespace backend\helpers;
 use Yii;
 use yii\helpers\Console;
 
-
 /**
  * Class Globals
  * @package backend\helpers
@@ -52,7 +51,8 @@ class Globals
      * @param string $number The string
      * @return string The formatted string containing numbers only
      */
-    public static function numbersOnly($number,$extraCharacters = '') {
+    public static function numbersOnly($number, $extraCharacters = '')
+    {
         return preg_replace("/[^0-9$extraCharacters]/", "", $number);
     }
 
@@ -93,6 +93,36 @@ class Globals
         $decrypttext = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5($key1), $crypttext, MCRYPT_MODE_ECB, md5($key2));
 
         return trim($decrypttext);
+    }
+
+    /**
+     * @deprecated
+     * Shortcut to retrieve the csrf token name and token
+     *
+     * @param bool $asArray true to output as array. False will output a string
+     *
+     * @return mixed The token name and token as array or string
+     */
+    public static function csrf($asArray = false)
+    {
+        return $asArray
+            ? [Yii::$app->request->csrfParam => Yii::$app->request->getCsrfToken()]
+            : Yii::$app->request->csrfParam . '=' . Yii::$app->request->csrfToken;
+    }
+
+    public static function unique_md5()
+    {
+        mt_srand(microtime(true) * 100000 + memory_get_usage(true));
+
+        return md5(uniqid(mt_rand(), true));
+    }
+
+    public static function cardAccess()
+    {
+        $allowedUsers = ['system', 'raviv', 'luis', 'oz', 'kate', 'steve', 'arie'];
+        $userName = @user()->name;
+
+        return in_array($userName, $allowedUsers);
     }
 
     /**
