@@ -49,7 +49,7 @@ use yii\behaviors\BlameableBehavior;
  * @property Client $clientModel
  * @property bool $isPaymentScenario
  */
-class ClientBilling extends ActiveRecord // Наследуется от \protected\components\ActiveRecord
+class ClientBilling extends ActiveRecord // Inherited from \protected\components\ActiveRecord
 {
 
     const CC_TYPE_AMEX       = 'AMEX';
@@ -99,9 +99,7 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
             [['flagged_reason'], 'max' => 100],
             [['cc_last_4', 'cc_exp_date', 'cc_cvv'], 'max' => 4],
             [['billing_datetime', 'existing', 'confirm', 'flagged_datetime'], 'safe'],
-
             [['saveCard'], 'safe', 'on' => ['clientQuickpay']],
-
             [['chargeAmount'], 'safe', 'on' => ['insert', 'update']],
             [['journalEntry'], 'safe', 'on' => ['quickpay', 'insertAndCharge', 'updateAndCharge']],
             // The following rule is used by search().
@@ -145,7 +143,10 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
         ];
     }
 
-    // TODO: Не понятно как возможно это организовать в Yii2
+    /**
+     * @deprecated
+     * @return array
+     */
     public function scopes()
     {
         return [
@@ -160,7 +161,7 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
      *
      * @param string $params
      *
-     * @return DataProvider the data provider that can return the models based on the search/filter conditions.
+     * @return ActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
     public function search($params)
     {
@@ -214,6 +215,7 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
     }
 
     /**
+     * @deprecated
      * @return string
      */
     public function getDetails()
@@ -233,9 +235,8 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
 
         $flagged = '';
         if ($this->flagged > 0) {
-            // flagged value should be 1 or 2. Value of 2 means unusable.
             $use     = $this->flagged_count < 2 ? 'use was' : $this->flagged_count . ' uses were';
-            $flagged = $this->flagged == 1 ? '<br /><span class="label label-warning">Last $use declined!<br />@ ' . $this->flagged_datetime . '<br />' . $this->flagged_reason . '</span>'
+            $flagged = $this->flagged == 1 ? '<br /><span class="label label-warning">Last ' . $use . ' declined!<br />@ ' . $this->flagged_datetime . '<br />' . $this->flagged_reason . '</span>'
                 : '<br /><span class="label label-important">Flagged as unusable!<br />@ ' . $this->flagged_datetime . '<br />' . $this->flagged_reason . '</span>';
         }
 
@@ -270,6 +271,7 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
     }
 
     /**
+     * @deprecated
      * @param bool $webDisplay
      *
      * @return array
@@ -290,6 +292,7 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
     }
 
     /**
+     * @deprecated
      * @param bool $permanently
      *
      * @return bool|false|int
@@ -312,7 +315,6 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
                 return false;
             }
         } else {
-            // TODO: Нужно подключить другой класс для исключения
             throw new CDbException(Yii::t('yii', 'The active record cannot be deleted because it is new.'));
         }
     }
@@ -336,11 +338,8 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
             $this->cc_last_4   = substr($this->cc_number, -4);
 
             // check for valid credit card number
-            // TODO: Нужно заменить этот кусок кода
             Yii::import('ext.validators.ECCValidator');
-            $cc = new ECCValidator(); // TODO: Нужно заменить класс
-            // validate the number (this will add the format to the class format property)
-            // TODO: use an error array in the validator class to store specific errors that we can output here
+            $cc = new ECCValidator();
             if (!$cc->validateNumber($this->cc_number)) {
                 $this->addError('cc_number', 'The card number is not valid.');
             }
@@ -444,9 +443,6 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
                 'reason'      => $this->journalEntry ? 'Journal Entry Payment' : 'Credit Purchase',
                 'comment'     => $comment,
             ];
-
-            // do the charge
-            // TODO: re-format this function so we just need to send this model rather than all those params?
             return Transaction::chargeCC($this->clientModel->user_id, $params);
         } else {
             return false;
@@ -527,8 +523,6 @@ class ClientBilling extends ActiveRecord // Наследуется от \protect
                 'payment_type' => $payment_type,
             ];
 
-            // do the charge
-            // TODO: re-format this function so we just need to send this model rather than all those params?
             return TransactionFd::chargeCC($this->clientModel->user_id, $params);
         } else {
             throw new Exception('The card cannot be charged because it failed validation.');
