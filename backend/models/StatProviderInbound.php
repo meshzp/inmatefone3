@@ -53,7 +53,7 @@ class StatProviderInbound extends ActiveRecord {
     /**
      * @return ActiveQuery
      */
-    public function getClientTransaction()
+    public function getProvider()
     {
         return $this->hasOne(Provider::className(), ['provider_id' => 'provider_id']);
     }
