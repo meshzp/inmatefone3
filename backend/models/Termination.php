@@ -116,8 +116,6 @@ class Termination extends ActiveRecord
             ->queryScalar();
     }
 
-    // note: at present, a 00 prefix needs to be added to the number
-
     /**
      * @return string the associated database table name
      */
@@ -156,6 +154,7 @@ class Termination extends ActiveRecord
          * ORDER BY LENGTH (termination_destination) DESC
          * LIMIT 1
          */
+        // note: at present, a 00 prefix needs to be added to the number
         if ($addZeroPrefix) {
             $number = '00' . $number;
         }
@@ -171,5 +170,4 @@ class Termination extends ActiveRecord
                 ->queryRow();
         },3600);
     }
-
 }
