@@ -5,9 +5,10 @@ namespace backend\models;
 use Yii;
 use backend\helpers\Globals;
 use yii\db\ActiveRecord;
-use yii\db\Exception;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\behaviors\TimestampBehavior;
+use yii\behaviors\BlameableBehavior;
 
 /**
  * This is the model class for table "users_associations".
@@ -60,7 +61,7 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
     public function beforeSave()
     {
         if ($this->isNewRecord) {
-            $this->association_status   = 1;
+            $this->association_status = 1;
         }
 
         return parent::beforeSave();
@@ -73,30 +74,17 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
     {
         return [
             [
-                'class' => TimestampBehavior::className(),
+                'class'              => TimestampBehavior::className(),
                 'createdAtAttribute' => 'association_datetime',
                 'updatedAtAttribute' => false,
-                'value' => date('Y-m-d H:i:s'),
+                'value'              => date('Y-m-d H:i:s'),
             ],
             [
-                'class' => BlameableBehavior::className(),
+                'class'              => BlameableBehavior::className(),
                 'createdByAttribute' => 'association_admin_id',
                 'updatedByAttribute' => false,
-                'value' => Globals::user()->id,
+                'value'              => Globals::user()->id,
             ],
-        ];
-    }
-
-    /**
-     * @return array relational rules.
-     */
-    public function relations()
-    {
-        // NOTE: you may need to adjust the relation name and the related
-        // class name for the relations automatically generated below.
-        return [
-            'associated'       => [self::BELONGS_TO, 'Client', 'associated_user_id'],
-            'associatedParent' => [self::BELONGS_TO, 'Client', 'user_id'],
         ];
     }
 
@@ -117,6 +105,7 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
         ];
     }
 
+    // TODO: Нужно придумать как организовать эту часть кода в Yii2
     public function scopes()
     {
         return [
@@ -221,6 +210,7 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
 
     /**
      * Custom validation for creating the association
+     *
      * @param string $attribute
      */
     public function checkAssociation($attribute)
@@ -240,6 +230,7 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
     /**
      * @deprecated
      * is this correct?? not yet checked lionel's code
+     *
      * @param bool $permanently
      *
      * @return bool|false|int
@@ -269,4 +260,19 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
         }
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssociated()
+    {
+        return $this->hasOne(Client::className(), ['associated_user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssociatedParent()
+    {
+        return $this->hasOne(Client::className(), ['user_id' => 'id']);
+    }
 }
