@@ -23,11 +23,12 @@ class Asterisk extends ActiveRecord
 {
 
     /**
-     * @return CDbConnection database connection
+     * @deprecated
+     * @return Database connection
      */
     public function getDbConnection()
     {
-        // TODO: Подключение компонента, дальше код будет с использованием этого метода будет отдавать ошибку
+        // TODO: Connection undefined component
         return Yii::$app->asteriskdb;
     }
 
@@ -36,7 +37,7 @@ class Asterisk extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'tbl_lookup';
+        return '{{%tbl_lookup}}';
     }
 
     /**
@@ -51,12 +52,12 @@ class Asterisk extends ActiveRecord
             [['in_number', 'out_number', 'out_number_2', 'seconds_remaining', 'cli_to_show', 'cli_name'], 'max' => 32],
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            [['in_number', 'out_number', 'out_number_2', 'seconds_remaining', 'cli_to_show', 'cli_name'], 'safe'],
+            [['in_number', 'out_number', 'out_number_2', 'seconds_remaining', 'cli_to_show', 'cli_name'], 'safe', 'on' => ['search']],
         ];
     }
 
     /**
-     * @return array customized attribute labels (name=>label)
+     * @return array customized attribute labels (name => label)
      */
     public function attributeLabels()
     {
@@ -75,7 +76,7 @@ class Asterisk extends ActiveRecord
      *
      * @param array $params
      *
-     * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
+     * @return ActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
     public function search($params)
     {
@@ -109,8 +110,6 @@ class Asterisk extends ActiveRecord
         return $dataProvider;
     }
 
-    // TODO: convert this function to something more Yii based
-
     /**
      * @deprecated
      *
@@ -136,7 +135,7 @@ class Asterisk extends ActiveRecord
         try {
             if (!$status) {
                 // delete any in numbers already existing
-                // TODO: Нужно что-то сделать, используется компонент из старого проекта
+                // TODO: Need to do something, use component from the old project
                 $connection->createCommand()->delete($this->tableName(), 'in_number=:in_number', [':in_number' => $in_number]);
 
                 $successCount = 1;
@@ -152,7 +151,6 @@ class Asterisk extends ActiveRecord
                         'cli_to_show'       => $cli,
                     ], 'in_number=:in_number', [':in_number' => $in_number]);
                 } else {
-                    // TODO: why are we not inserting the cli_to_show here?
                     $connection->createCommand()->insert($this->tableName(), [
                         'in_number'         => $in_number,
                         'out_number'        => $out_number,
