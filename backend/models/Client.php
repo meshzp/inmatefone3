@@ -82,7 +82,7 @@ use backend\helpers\Globals;
  * @property string $credit_notification_send_date
  * @property string $minutes_notification_send_date
  */
-class Client extends ActiveRecord // TODO: Наследует \protected\components\ActiveRecord.php
+class Client extends ActiveRecord // TODO: Inherited from \protected\components\ActiveRecord.php
 {
     const STATUS_ACTIVE    = 1;
     const STATUS_BLOCKED   = 2;
@@ -146,7 +146,7 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     {
         return [
             'activerecord-relation' => [
-                // TODO: Нужно заменить класс
+                // TODO: Need replace class
                 'class' => 'ext.behaviors.activerecord-relation.EActiveRecordRelationBehavior',
             ],
         ];
@@ -254,7 +254,8 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     }
 
     /**
-     * TODO: Решил не трогать, решил что не получиться правильно реализовать
+     * TODO: Need to rewrite the method
+     * @deprecated
      * Retrieves a list of models based on the current search/filter conditions.
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
@@ -375,7 +376,8 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     }
 
     /**
-     * TODO: Решил не трогать, решил что не получиться правильно реализовать
+     * TODO: Need to rewrite the method
+     * @deprecated
      * Retrieves a list of models based on the current search/filter conditions.
      * Primarily for use by forms that need to select a client.
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
@@ -440,7 +442,8 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     }
 
     /**
-     * TODO: Решил не трогать, решил что не получиться правильно реализовать
+     * TODO: Need to rewrite the method
+     * @deprecated
      * Retrieves a list of models based on the current search/filter conditions - specifically for charging cards.
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
@@ -561,7 +564,8 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     }
 
     /**
-     * TODO: Решил не трогать, решил что не получиться правильно реализовать
+     * TODO: Need to rewrite the method
+     * @deprecated
      * Retrieves a list of models based on the current search/filter conditions.
      * Primarily for use by the campaign section to filter clients to send to
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
@@ -670,7 +674,13 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
         return $value;
     }
 
-    // TODO: Не понятно как организовать список
+    /**
+     * TODO: Need to rewrite the method
+     * @deprecated
+     * @param bool $activeOnly
+     *
+     * @return mixed
+     */
     public function getClientList($activeOnly = true)
     {
         if ($activeOnly) {
@@ -1087,7 +1097,8 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     }
 
     /**
-     * TODO: Не трогал этот метод
+     * TODO: Need to rewrite the method
+     * @deprecated
      * @return mixed
      */
     public function getAssociatedWith()
@@ -1097,7 +1108,8 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     }
 
     /**
-     * TODO: Не трогал этот метод
+     * TODO: Need to rewrite the method
+     * @deprecated
      * @param bool $asLink
      *
      * @return mixed
@@ -1109,7 +1121,8 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     }
 
     /**
-     * TODO: Не трогал этот метод
+     * TODO: Need to rewrite the method
+     * @deprecated
      * @param bool $asLink
      *
      * @return mixed
@@ -1163,7 +1176,6 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     {
         // create token and datetime for new records
         if ($this->isNewRecord) {
-            // TODO: is token actually needed?
             $this->token         = Globals::uniqueMd5();
             $this->user_datetime = date('Y-m-d H:i:s');
         } else {
@@ -1172,7 +1184,7 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
         }
 
         // update user_admin
-        $this->user_admin = Globals::user()->id; // TODO: это метод нужно отредактировать в helpers
+        $this->user_admin = Globals::user()->id;
 
         // update datetime
         $this->user_datetime_last_update = date('Y-m-d H:i:s');
@@ -1183,9 +1195,6 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
         $this->user_inmate_first_name = trim($this->user_inmate_first_name);
         $this->user_inmate_last_name  = trim($this->user_inmate_last_name);
         $this->user_reg_number        = trim($this->user_reg_number);
-
-        // phone number should be numbers only - with country code removed
-        // TODO: uncomment this once we've sorted out what to do with inserting multiple numbers
 
         // update full name columns for clients
         if (!empty($this->user_first_name) || !empty($this->user_last_name)) {
@@ -1213,6 +1222,7 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
     }
 
     /**
+     * TODO: Need to rewrite the method
      * @deprecated
      * @inheritdoc
      */
@@ -1224,7 +1234,7 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
             return false;
         }
 
-        if ($this->isAttributeDirty('user_status')) { // TODO: Нужно заменить этот метод
+        if ($this->isAttributeDirty('user_status')) {
             // add log entry
             // original code ... INSERT INTO user_logs (user_id, user_status, log_datetime, log_by) VALUES ('$user_id','$user_status','$today','$admin_id')
             $log               = new ClientLog();
@@ -1236,7 +1246,7 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
         }
 
         // The following should only be done if we have had a change of status
-        if ($this->isAttributeDirty('user_status')) { // TODO: Нужно заменить этот метод
+        if ($this->isAttributeDirty('user_status')) {
             // update client did's
             // original UPDATE user_dids SET datetime_cancel='$datetime_cancel', datetime_last_update='$today',
             // status='$user_status', admin_id_last_update='$admin_id', asterisk='0' WHERE user_id='$user_id' AND status!='0'
@@ -1270,7 +1280,7 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
         }
 
         // check if we need to update the user phone table
-        if ($this->isAttributeDirty('user_phone')) { // TODO: Нужно заменить этот метод
+        if ($this->isAttributeDirty('user_phone')) {
             $this->updateUserPhone();
         }
 
@@ -1297,7 +1307,7 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
         if (count($values)) {
             // delete the previous phone numbers for this client then insert new
             Yii::$app->db->createCommand()->delete('user_phone', 'user_id = :clientId', [':clientId' => $this->user_id]);
-            Yii::$app->db->createCommand()->insertIgnore('user_phone', $values); // TODO: Не смог найти аналогию insertIgnore()
+            Yii::$app->db->createCommand()->insertIgnore('user_phone', $values); // TODO: Couldn't find an analogy insertIgnore()
         }
     }
 
@@ -1512,41 +1522,65 @@ class Client extends ActiveRecord // TODO: Наследует \protected\compone
         return false;
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getFacility()
     {
         return $this->hasOne(Facility::className(), ['user_facility' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getService()
     {
         return $this->hasOne(Service::className(), ['user_service' => 'id']);
     }
 
+    /**
+     * @return $this
+     */
     public function getCurrency()
     {
         return $this->hasOne(Currency::className(), ['user_currency' => 'id'])->onCondition([$this->tableAlias . '.user_currency' => 'currency.currency_prefix']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCorrlinksAccount()
     {
         return $this->hasOne(CorrlinksAccount::className(), ['corrlinks_account_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCorrlinksContact()
     {
         return $this->hasOne(CorrlinksContact::className(), ['corrlinks_contact_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCorrlinksSupportAccount()
     {
         return $this->hasOne(CorrlinksAccount::className(), ['corrlinks_support_account_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCorrlinksSupportContact()
     {
         return $this->hasOne(CorrlinksContact::className(), ['corrlinks_support_contact_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getClientPlans()
     {
         return $this->hasMany(ClientPlan::className(), ['user_id' => 'id']);

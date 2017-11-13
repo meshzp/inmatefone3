@@ -11,7 +11,6 @@ use yii\helpers\Console;
  */
 class Globals
 {
-
     /**
      * @param string $key
      * @param mixed $value
@@ -48,12 +47,15 @@ class Globals
     /**
      * @deprecated
      * Shortcut to strip everything but numbers from a string
+     *
      * @param string $number The string
+     * @param string $extraCharacters
+     *
      * @return string The formatted string containing numbers only
      */
     public static function numbersOnly($number, $extraCharacters = '')
     {
-        return preg_replace("/[^0-9$extraCharacters]/", "", $number);
+        return preg_replace('/[^0-9' . $extraCharacters . ']/', '', $number);
     }
 
     /**
@@ -110,23 +112,31 @@ class Globals
             : Yii::$app->request->csrfParam . '=' . Yii::$app->request->csrfToken;
     }
 
-    public static function unique_md5()
+    /**
+     * @deprecated
+     * @return string
+     */
+    public static function uniqueMd5()
     {
         mt_srand(microtime(true) * 100000 + memory_get_usage(true));
 
         return md5(uniqid(mt_rand(), true));
     }
 
+    /**
+     * @deprecated
+     * @return bool
+     */
     public static function cardAccess()
     {
         $allowedUsers = ['system', 'raviv', 'luis', 'oz', 'kate', 'steve', 'arie'];
-        $userName = @user()->name;
+        $userName = @self::user()->name;
 
         return in_array($userName, $allowedUsers);
     }
 
     /**
-     * TODO: Не понятно как изменить правильно этот метод
+     * TODO: It is not clear how to correctly change this method
      * @deprecated
      * @return stdClass
      */
@@ -150,16 +160,5 @@ class Globals
         }
 
         return Yii::app()->getUser();
-    }
-
-    /**
-     * @deprecated
-     * @return string
-     */
-    public static function uniqueMd5()
-    {
-        mt_srand(microtime(true) * 100000 + memory_get_usage(true));
-
-        return md5(uniqid(mt_rand(), true));
     }
 }
