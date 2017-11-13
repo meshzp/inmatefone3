@@ -79,10 +79,6 @@ class ClientStatus extends ActiveRecord
         return $clientStatus->save();
     }
 
-    /*
-     * This is the main function to use for checking the user status and replaces the blockDID function
-     */
-
     /**
      * Retrieves a list of models based on the current search/filter conditions.
      * @return ActiveDataProvider the data provider that can return the models based on the search/filter conditions.
@@ -104,5 +100,4 @@ class ClientStatus extends ActiveRecord
             'query' => $query,
         ]);
     }
-
 }
