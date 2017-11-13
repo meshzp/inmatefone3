@@ -97,6 +97,9 @@ class TransactionFd extends ActiveRecord
         ];
     }
 
+    /**
+     * @inheritdoc
+     */
     public function beforeValidate()
     {
         if ($this->scenario == 'refund') {
@@ -160,12 +163,15 @@ class TransactionFd extends ActiveRecord
         ];
     }
 
+    /**
+     * @inheritdoc
+     */
     public function beforeSave()
     {
         if ($this->isNewRecord) {
-            $this->ip_address = Util::getRemoteIpAddress();
+            $this->ip_address = Yii::$app->request->getUserIP();
             $this->requested  = date('Y-m-d H:i:s');
-            $this->admin_id   = user()->id;
+            $this->admin_id   = Yii::$app->getUser()->getId();
             // encrypt cc number and cvv
             $this->cc_number_plain = $this->cc_number;
             $this->cc_number       = Globals::encrypt($this->cc_number, $this->user_id);
@@ -191,18 +197,18 @@ class TransactionFd extends ActiveRecord
      *
      * @param $clientId int
      * @param $params array
-     *
+     * @throws Exception
      * @return bool|array False if there was an error before reaching the gateway. An array containg 'approved' and 'ctr' indexes.
      */
     public static function chargeCC($clientId, $params)
     {
-        $clientModel = Client::model()->findByPk($clientId);
+        $clientModel = Client::findOne($clientId);
         if ($clientModel === null) {
             throw new Exception('The requested client does not exist.');
         }
 
         // check whether public site or not
-        $public = empty(Yii::app()->params['serviceId']) ? false : true;
+        $public = empty(Yii::$app->params['serviceId']) ? false : true;
 
         $defaultParams = [
             'profile_id'      => 0, // this is the card id number from billing_details and should be provided or zero if one off payment (quickPay)
@@ -321,7 +327,7 @@ class TransactionFd extends ActiveRecord
                     'client_ip'            => $transactionModel->ip_address,
                 ];
                 //$amount,$cardHolderName,$cardNumber,$cardExpiry,$optionalParams = array()
-                $response = Yii::app()->fdapi->doPurchase($params['amount'], $params['cardholder_name'], $params['cc_number'], $params['cc_exp_date'], $billingParams);
+                $response = Yii::$app->fdapi->doPurchase($params['amount'], $params['cardholder_name'], $params['cc_number'], $params['cc_exp_date'], $billingParams);
                 if (!empty($response) && is_object($response)) {
                     // successful response (not necessarily successful transaction at this point though)
                     // save the response fields to the transaction model
@@ -350,7 +356,7 @@ class TransactionFd extends ActiveRecord
 
                         // save the correct comment and amounts in the client transaction model
                         $clientTransactionModel->credit_update = $params['amount'];
-                        $clientTransactionModel->new_balance   = new CDbExpression('(SELECT user_balance FROM user_datas WHERE user_id = :clientId)', [':clientId' => $clientId]);
+                        $clientTransactionModel->new_balance   = new \yii\db\Exception('(SELECT user_balance FROM user_datas WHERE user_id = :clientId)', [':clientId' => $clientId]);
                         $clientTransactionModel->comment       = $params['comment'];
                         $clientTransactionModel->save(false, ['credit_update', 'new_balance', 'comment']);
                         // NOTE: if we use new_balance from the clientTransactionModel again after this point, it will be necessary to refresh the model
@@ -395,7 +401,7 @@ class TransactionFd extends ActiveRecord
                             // note there are two flag levels ...
                             // level 1 is a general decline and the card is probably still useable. Automatic charges to the card should be used with caution.
                             // level 2 means the card is completely unusable e.g. code 502 Lost/Stolen
-                            $clientBillingModel = ClientBilling::model()->findByPk($params['profile_id']);
+                            $clientBillingModel = ClientBilling::findOne($params['profile_id']);
                             if ($clientBillingModel) {
                                 $clientBillingModel->flagged          = in_array((int)$response->bank_resp_code, $transactionModel->unusableCodes) ? 2 : 1;
                                 $clientBillingModel->flagged_by       = (int)@user()->id;
