@@ -98,10 +98,13 @@ class Campaign extends ActiveRecord
             [['name'], 'max' => 64],
             [['description', 'email_from_address', 'email_from_name', 'email_subject'], 'max' => 255],
             [['sms_from'], 'max' => 20],
+            [['email_html', 'email_text', 'sms_text', 'filter', 'start_at'], 'safe'],
+            // client filter attribs ...
             [['client_status', 'client_facility_type', 'client_exclude_plans'], 'safe'],
+
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            [['id', 'name', 'description', 'send_type', 'email_from_address', 'email_from_name', 'email_subject', 'email_html', 'email_text', 'sms_from', 'sms_text', 'filter', 'status', 'created_at', 'start_at'], 'safe'],
+            [['id', 'name', 'description', 'send_type', 'email_from_address', 'email_from_name', 'email_subject', 'email_html', 'email_text', 'sms_from', 'sms_text', 'filter', 'status', 'created_at', 'start_at'], 'safe', 'on' => ['search']],
         ];
     }
 
