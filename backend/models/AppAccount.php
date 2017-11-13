@@ -148,7 +148,7 @@ class AppAccount extends ActiveRecord
             [['username', 'password'], 'max' => 255],
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            [['id, phone_number, username, password, verify_code, status, created_at, updated_at'], 'safe'],
+            [['id', 'phone_number', 'username', 'password', 'verify_code', 'status', 'created_at', 'updated_at'], 'safe', 'on' => ['search']],
         ];
     }
 
