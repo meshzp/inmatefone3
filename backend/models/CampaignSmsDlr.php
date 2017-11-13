@@ -51,9 +51,10 @@ class CampaignSmsDlr extends ActiveRecord
             [['sms_provider_id'], 'integer'],
             [['campaign_sms_id'], 'max' => 11],
             [['type', 'smsc_reply'], 'max' => 255],
+            [['sent_at'], 'safe'],
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            [['id', 'campaign_sms_id', 'sms_provider_id', 'sent_at', 'type', 'smsc_reply', 'created_at'], 'safe'],
+            [['id', 'campaign_sms_id', 'sms_provider_id', 'sent_at', 'type', 'smsc_reply', 'created_at'], 'safe', 'on' => ['search']],
         ];
     }
 
