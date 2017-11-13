@@ -15,7 +15,7 @@ use yii\db\ActiveRecord;
  * @property string $connect_datetime
  * @property integer $connect_status
  */
-class ClientConnect extends ActiveRecord // Наследуется от \protected\components\ActiveRecord
+class ClientConnect extends ActiveRecord
 {
     /**
      * @return string the associated database table name
