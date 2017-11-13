@@ -23,9 +23,12 @@ use yii\behaviors\BlameableBehavior;
  * @property integer $association_cancel_admin_id
  * @property integer $association_status
  */
-class ClientAssociation extends ActiveRecord // Наследуется от \protected\components\ActiveRecord
+class ClientAssociation extends ActiveRecord // Inherited from \protected\components\ActiveRecord.php
 {
 
+    /**
+     * @var string
+     */
     public $associated_name;
 
     /**
@@ -89,7 +92,7 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
     }
 
     /**
-     * @return array customized attribute labels (name=>label)
+     * @return array customized attribute labels (name => label)
      */
     public function attributeLabels()
     {
@@ -105,7 +108,10 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
         ];
     }
 
-    // TODO: Нужно придумать как организовать эту часть кода в Yii2
+    /**
+     * @deprecated
+     * @return array
+     */
     public function scopes()
     {
         return [
@@ -125,12 +131,12 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
     }
 
     /**
+     * @deprecated
      * Retrieves a list of models based on the current search/filter conditions.
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
     public function search()
     {
-        // TODO: Решил не трогать, что бы не поломать
         // Warning: Please modify the following code to remove attributes that
         // should not be searched.
 
@@ -181,7 +187,7 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
         }
         if ($asLink) {
             $text = $model->associatedParent->user_last_name . ', ' . $model->associatedParent->user_first_name . ' / ' . $model->associatedParent->user_inmate_last_name . ', ' . $model->associatedParent->user_inmate_first_name;
-            $url  = Url::to('/client/update', ['id' => $model->user_id]);
+            $url  = Url::to(['/client/update', ['id' => $model->user_id]]);
 
             return Html::a($text, $url);
         } else {
@@ -191,7 +197,7 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
 
     /**
      * Render the name value for grid output.
-     * This should be used in a grid using 'value'=>[$model, 'gridName']
+     * This should be used in a grid using 'value' => [$model, 'gridName']
      *
      * @param object $data
      *
@@ -203,12 +209,13 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
             return "** Warning: Client #{$data->associated_user_id} Not Found **";
         }
         $text = $data->associated->user_last_name . ', ' . $data->associated->user_first_name . ' / ' . $data->associated->user_inmate_last_name . ', ' . $data->associated->user_inmate_first_name;
-        $url  = Url::to('/client/update', ['id' => $data->associated_user_id]);
+        $url  = Url::to(['/client/update', ['id' => $data->associated_user_id]]);
 
         return Html::a($text, $url, ['target' => '_blank']);
     }
 
     /**
+     * @deprecated
      * Custom validation for creating the association
      *
      * @param string $attribute
@@ -219,7 +226,6 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
         if ($this->associated_user_id == $this->user_id) {
             $this->addError($attribute, 'You cannot add an assocation to the same client');
         } else {
-            // TODO: what about if the users are associated the other way round like in referrals?
             $exists = $this->count('associated_user_id=:associatedUserId AND user_id=:userId AND association_status!=0', [':associatedUserId' => $this->associated_user_id, ':userId' => $this->user_id]);
             if ($exists) {
                 $this->addError($attribute, 'An association with this client already exists');
@@ -255,7 +261,6 @@ class ClientAssociation extends ActiveRecord // Наследуется от \pro
                 return false;
             }
         } else {
-            // TODO: Нужно прописать какой-то класс, для исключания
             throw new CDbException(Yii::t('yii', 'The active record cannot be deleted because it is new.'));
         }
     }
