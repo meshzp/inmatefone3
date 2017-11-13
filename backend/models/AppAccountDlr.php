@@ -55,9 +55,10 @@ class AppAccountDlr extends ActiveRecord
             [['sms_provider_id'], 'integer'],
             [['app_account_id', 'app_account_registration_id'], 'max' => 11],
             [['type, smsc_reply'], 'max' => 255],
+            [['sent_at'], 'safe'],
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            [['id, app_account_id', 'app_account_registration_id', 'sms_provider_id', 'sent_at', 'type', 'smsc_reply', 'created_at'], 'safe'],
+            [['id, app_account_id', 'app_account_registration_id', 'sms_provider_id', 'sent_at', 'type', 'smsc_reply', 'created_at'], 'safe', 'on' => ['search']],
         ];
     }
 
