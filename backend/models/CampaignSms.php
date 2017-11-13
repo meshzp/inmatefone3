@@ -50,6 +50,7 @@ class CampaignSms extends ActiveRecord
             [['user_id'], 'max' => 20],
             [['to_number', 'to_e164'], 'max' => 32],
             [['region_code'], 'max' => 3],
+            [['sent_at'], 'safe'],
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
             [['id', 'campaign_id', 'user_id', 'contact_type', 'to_number', 'to_e164', 'region_code', 'number_type', 'status', 'created_at', 'sent_at'], 'safe'],
