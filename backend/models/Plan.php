@@ -168,7 +168,7 @@ class Plan extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getClientTransaction()
+    public function getCurrency()
     {
         return $this->hasOne(Currency::className(), ['currency_prefix' => 'plan_currency']);
     }
