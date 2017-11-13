@@ -47,9 +47,10 @@ class CampaignEmail extends ActiveRecord
             [['user_id'], 'max' => 20],
             [['to_address'], 'max' => 32],
             [['to_name'], 'max' => 255],
+            ['sent_at', 'safe'],
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            [['id', 'campaign_id', 'user_id', 'contact_type', 'to_address', 'to_name', 'status', 'created_at', 'sent_at'], 'safe'],
+            [['id', 'campaign_id', 'user_id', 'contact_type', 'to_address', 'to_name', 'status', 'created_at', 'sent_at'], 'safe', 'on' => ['search']],
         ];
     }
 
