@@ -46,11 +46,12 @@ class AsteriskCdr extends ActiveRecord // TODO: В оригинале испол
         // NOTE: you should only define rules for those attributes that
         // will receive user inputs.
         return [
+            [['accountcode', 'cli', 'dst', 'context', 'cli2', 'channel', 'obchannel', 'lastapp', 'data', 'start_stamp', 'answered_stamp', 'end_stamp', 'duration', 'billsec', 'disposition', 'bs', 'uuid'], 'safe'],
             [['duration, billsec, sync'], 'integer'],
             [['accountcode', 'cli', 'dst', 'context', 'cli2', 'channel', 'obchannel', 'lastapp', 'data', 'disposition', 'bs', 'uuid'], 'max' => 255],
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            [['accountcode', 'cli', 'dst', 'context', 'cli2', 'channel', 'obchannel', 'lastapp', 'data', 'start_stamp', 'answered_stamp', 'end_stamp', 'duration', 'billsec', 'disposition', 'bs', 'uuid', 'sync'], 'safe'],
+            [['accountcode', 'cli', 'dst', 'context', 'cli2', 'channel', 'obchannel', 'lastapp', 'data', 'start_stamp', 'answered_stamp', 'end_stamp', 'duration', 'billsec', 'disposition', 'bs', 'uuid', 'sync'], 'safe', 'on' => ['search']],
         ];
     }
 
