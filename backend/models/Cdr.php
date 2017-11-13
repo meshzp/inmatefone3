@@ -50,7 +50,7 @@ use yii\helpers\Html;
  * @property Did $did
  * @property ClientCsr $clientCsr
  */
-class Cdr extends ActiveRecord // TODO: Наследует \protected\components\ActiveRecord.php
+class Cdr extends ActiveRecord // TODO: Inherited from \protected\components\ActiveRecord.php
 {
     public $didFilter;
     public $date;
@@ -94,7 +94,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
     }
 
     /**
-     * @return array customized attribute labels (name=>label)
+     * @return array customized attribute labels (name => label)
      */
     public function attributeLabels()
     {
@@ -134,7 +134,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
     }
 
     /**
-     * TODO: Этот метод не трогал, потому что слишком большой и сложный
+     * @deprecated
      * Retrieves a list of models based on the current search/filter conditions.
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
@@ -185,23 +185,12 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
             $criteria->with['clientCsr'] = [
                 'alias'  => 'clientCsr',
                 'select' => 'clientCsr.user_id, clientCsr.is_redirect',
-                //'condition' => 'clientCsr.is_redirect = 0',
-                //                'with' => array(
-                //                    'client' => array(
-                //                        'alias' => 'clientCsrClient',
-                //                        'select' => 'clientCsrClient.user_id, clientCsrClient.user_first_name, clientCsrClient.user_last_name',
-                //                    )
-                //                )
             ];
         }
 
         // this isn't ideal as it only gets current point in time info rather than when the call was made
         // should really put an extra field in cdrs containing the user_did_id
         $criteria->join = 'LEFT OUTER JOIN user_dids clientDid ON t.user_id=clientDid.user_id AND t.did_id = clientDid.did_id AND clientDid.status > 0';
-
-        // TODO: find out why the search is producing dupe rows and remove this grouping when done
-        // // note: yii takes care of grouping automatically but still need to check what's going on
-        //$criteria->group='t.cdr_id';
 
         $criteria->compare('t.cdr_id', $this->cdr_id);
         $criteria->limit = 5000; // just in case someone sets to all, would this work?
@@ -216,9 +205,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
 
         if (!empty($this->start_datetime)) {
             $dateRange = explode(' - ', $this->start_datetime);
-            //dumpd($dateRange);
             if (count($dateRange) == 1 || $dateRange[0] == @$dateRange[1]) {
-                //dumpd($dateRange);
                 $datetime = date('Y-m-d', strtotime($dateRange[0]));
                 $dateSql  = "(DATE(t.start_datetime) = '$datetime' OR DATE(t.answered_datetime) = '$datetime')";
             } elseif (count($dateRange) == 2) {
@@ -229,12 +216,9 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
                 $dateSql = "(DATE_FORMAT(t.start_datetime,'%Y-%m') = '" . date('Y-m') . "' OR DATE_FORMAT(t.answered_datetime,'%Y-%m') = '" . date('Y-m') . "')";
             }
             $criteria->addcondition($dateSql);
-            //dumpd($dateSql);
         }
-        //$this->date = date('m/d/Y').' - '.date('m/d/Y');
 
         $criteria->compare('t.currency', $this->currency, true);
-        //$criteria->compare('t.user_id', $this->user_id);
         $criteria->compare('t.facility_id', $this->facility_id);
         $criteria->compare('t.sip_id', $this->sip_id);
         if (!empty($this->didFilter)) {
@@ -242,7 +226,6 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
             $criteria->addCondition("did.did LIKE $did OR t.service_name LIKE $did");
         }
 
-        //$criteria->compare('t.did_id', $this->did_id);
         $criteria->compare('t.rate_center_id', $this->rate_center_id);
         $criteria->compare('t.termination_id', $this->termination_id);
         $criteria->compare('t.termination_type', $this->termination_type, true);
@@ -251,9 +234,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
         $criteria->compare('t.destination_dialed', $this->destination_dialed, true);
         $criteria->compare('t.cli', $this->cli, true);
         $criteria->compare('t.cli2', $this->cli2, true);
-        //$criteria->compare('t.start_datetime', $this->start_datetime, true);
         $criteria->compare('t.answered_datetime', $this->answered_datetime, true);
-        //$criteria->compare('t.end_datetime', $this->end_datetime, true);
         $criteria->compare('t.billsec', $this->billsec);
         $criteria->compare('t.duration', $this->duration);
         $criteria->compare('t.duration_reports', $this->duration_reports, true);
@@ -278,9 +259,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
             $criteria->compare('t.vm_detected', $this->vm_detected);
             $criteria->compare('t.dtmf', 'none');
         }
-
-        // ignore service.800.nobill
-        $criteria->addCondition("t.service_name != 'service.800.nobill' OR t.service_name IS NULL");
+        $criteria->addCondition('t.service_name != \'service.800.nobill\' OR t.service_name IS NULL');
 
         $sort               = new CSort();
         $sort->attributes   = [
@@ -308,15 +287,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
                 'asc'  => 'clientDid.name ASC',
                 'desc' => 'clientDid.name DESC',
             ],
-            //            'did_notes' => array(
-            //                'asc' => 'did_notes ASC',
-            //                'desc' => 'did_notes DESC',
-            //            ),
-            //            'user_count' => array(
-            //                'asc' => 'user_count ASC',
-            //                'desc' => 'user_count DESC',
-            //            ),
-            '*', // this adds all of the other columns as sortable
+            '*',
         ];
         $sort->defaultOrder = 't.start_datetime DESC, t.answered_datetime DESC, t.cdr_id DESC';
 
@@ -326,17 +297,21 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
         ]);
     }
 
-    /*
+    /**
+     * @deprecated
      * Gets the background row color for cdr grid
      * Based on current model
+     *
      * @param int $row The row number
+     *
+     * @return string
      */
     public function getRowColor($row)
     {
         if (empty($this->token)) {
             $colorCode = $row & 1 ? '#ffffff' : '#eeeeff';
         } else {
-            // TODO: Используется не известный компонент
+            // TODO: Use not known to the component
             $colorCode = Yii::$app->color->getRowColor($this->token);
         }
 
@@ -344,7 +319,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
     }
 
     /**
-     * TODO: Этот метод не трогал, потому что слишком большой и сложный
+     * @deprecated
      * Retrieves a list of models based on the current search/filter conditions.
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
@@ -391,10 +366,6 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
 
         $criteria->join = 'LEFT OUTER JOIN user_dids clientDid ON t.user_id=clientDid.user_id AND t.did_id = clientDid.did_id AND clientDid.status > 0';
 
-        // TODO: find out why the search is producing dupe rows and remove this grouping when done
-        // // note: yii takes care of grouping automatically but still need to check what's going on
-        //$criteria->group='t.cdr_id';
-
         $criteria->compare('t.cdr_id', $this->cdr_id);
         $criteria->limit = 5000; // just in case someone sets to all, would this work?
 
@@ -428,9 +399,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
 
         if (!empty($this->start_datetime)) {
             $dateRange = explode(' - ', $this->start_datetime);
-            //dumpd($dateRange);
             if (count($dateRange) == 1 || $dateRange[0] == @$dateRange[1]) {
-                //dumpd($dateRange);
                 $datetime = date('Y-m-d', strtotime($dateRange[0]));
                 $dateSql  = "(DATE(t.start_datetime) = '$datetime' OR DATE(t.answered_datetime) = '$datetime')";
             } elseif (count($dateRange) == 2) {
@@ -441,12 +410,9 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
                 $dateSql = "(DATE_FORMAT(t.start_datetime,'%Y-%m') = '" . date('Y-m') . "' OR DATE_FORMAT(t.answered_datetime,'%Y-%m') = '" . date('Y-m') . "')";
             }
             $criteria->addcondition($dateSql);
-            //dumpd($dateSql);
         }
-        //$this->date = date('m/d/Y').' - '.date('m/d/Y');
 
         $criteria->compare('t.currency', $this->currency, true);
-        //$criteria->compare('t.user_id', $this->user_id);
         $criteria->compare('t.facility_id', $this->facility_id);
         $criteria->compare('t.sip_id', $this->sip_id);
         $criteria->compare('t.did_id', $this->did_id);
@@ -458,9 +424,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
         $criteria->compare('t.destination_dialed', $this->destination_dialed, true);
         $criteria->compare('t.cli', $this->cli, true);
         $criteria->compare('t.cli2', $this->cli2, true);
-        //$criteria->compare('t.start_datetime', $this->start_datetime, true);
         $criteria->compare('t.answered_datetime', $this->answered_datetime, true);
-        //$criteria->compare('t.end_datetime', $this->end_datetime, true);
         $criteria->compare('t.billsec', $this->billsec);
         $criteria->compare('t.duration', $this->duration);
         $criteria->compare('t.duration_reports', $this->duration_reports, true);
@@ -471,7 +435,6 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
         $criteria->compare('t.uuid', $this->uuid, true);
         $criteria->compare('t.token', $this->token, true);
         $criteria->compare('t.synced_billed', $this->synced_billed);
-        // ignore service.800.nobill
         $criteria->addCondition("t.service_name != 'service.800.nobill' OR t.service_name IS NULL");
 
         $sort               = new CSort();
@@ -504,7 +467,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
                 'asc'  => 't.start_datetime ASC,t.answered_datetime ASC',
                 'desc' => 't.start_datetime DESC,t.answered_datetime DESC',
             ],
-            '*', // this adds all of the other columns as sortable
+            '*',
         ];
         $sort->defaultOrder = 't.cdr_id DESC';
 
@@ -646,6 +609,7 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
     }
 
     /**
+     * @deprecated
      * Render the balance value for grid output.
      * This should be used in a grid using 'value' => [$model, 'gridBilled']
      * This is so that the currency symbol doesn't get called multiple times
@@ -671,7 +635,6 @@ class Cdr extends ActiveRecord // TODO: Наследует \protected\components
             $current    = 0;
             $maxTotal   = 4;
             foreach ($data->clientCsr as $clientCsr) {
-                // don't add in clients where the match was on the redirect number
                 if (empty($clientCsr->is_redirect)) {
                     $link = Html::a($clientCsr->user_id, ['client/update', 'id' => $clientCsr->user_id]);
                     if ($current === $maxPerLine) {
