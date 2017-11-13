@@ -46,11 +46,13 @@ class Globals
     }
 
     /**
+     * @deprecated
      * Shortcut to strip everything but numbers from a string
      * @param string $number The string
      * @return string The formatted string containing numbers only
      */
-    public static function numbersOnly($number,$extraCharacters = '') {
+    public static function numbersOnly($number, $extraCharacters = '')
+    {
         return preg_replace("/[^0-9$extraCharacters]/", "", $number);
     }
 
@@ -93,11 +95,6 @@ class Globals
         return trim($decrypttext);
     }
 
-    public static function unique_md5() {
-        mt_srand(microtime(true) * 100000 + memory_get_usage(true));
-        return md5(uniqid(mt_rand(), true));
-    }
-
     /**
      * @deprecated
      * Shortcut to retrieve the csrf token name and token
@@ -111,5 +108,20 @@ class Globals
         return $asArray
             ? [Yii::$app->request->csrfParam => Yii::$app->request->getCsrfToken()]
             : Yii::$app->request->csrfParam . '=' . Yii::$app->request->csrfToken;
+    }
+
+    public static function unique_md5()
+    {
+        mt_srand(microtime(true) * 100000 + memory_get_usage(true));
+
+        return md5(uniqid(mt_rand(), true));
+    }
+
+    public static function cardAccess()
+    {
+        $allowedUsers = ['system', 'raviv', 'luis', 'oz', 'kate', 'steve', 'arie'];
+        $userName = @user()->name;
+
+        return in_array($userName, $allowedUsers);
     }
 }
