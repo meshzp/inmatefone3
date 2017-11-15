@@ -10,7 +10,7 @@ use yii\helpers\Html;
 $piwikLoginUser = ''; // TODO: Need to declare a variable, previously was: Yii::app()->user->name == 'oz' ? 'ozm' : Yii::app()->user->name
 $piwikLoginPass = 'b86792ac9e4b1b672d96de0388aa16c2';
 
-if (!Yii::$app->user->isGuest) {
+if (Yii::$app->user->isGuest) {
     $menuItemsRight = [
         ['label' => 'Login', 'url' => ['/site/login']],
     ];
@@ -97,7 +97,7 @@ if (!empty($menuItemsRight)) :
     echo NavX::widget(['options' => ['class' => 'navbar-nav navbar-right'], 'items' => $menuItemsRight, 'activateParents' => true, 'encodeLabels' => false]);
 endif;
 
-if (Yii::$app->user->isGuest) :
+if (!Yii::$app->user->isGuest) :
     echo Html::beginForm('?', 'post', ['class' => 'navbar-form navbar-right']);
     echo Html::textInput('search', '', ['class' => 'form-control', 'placeholder' => 'Search']);
     echo Html::endForm();
