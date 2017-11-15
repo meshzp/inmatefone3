@@ -79,7 +79,7 @@ if (Yii::$app->user->isGuest) {
             ],
         ],
         [
-            'label'       => 123, //'Logout (' . Html::encode(Yii::$app->user->identity->nickname) . ')',
+            'label'       => 'Logout (' . Html::encode(Yii::$app->user->identity->nickname) . ')',
             'url'         => ['/site/logout'],
             'linkOptions' => ['data-method' => 'post'],
         ],
