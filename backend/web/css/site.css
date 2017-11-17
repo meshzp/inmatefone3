@@ -101,9 +101,9 @@ a.desc:after {
     border: none;
 }
 
-@media(max-width:767px) {
+@media (max-width: 767px) {
     .nav li > form > button.logout {
-        display:block;
+        display: block;
         text-align: left;
         width: 100%;
         padding: 10px 15px;
@@ -117,4 +117,37 @@ a.desc:after {
 
 .nav > li > form > button.logout:focus {
     outline: none;
+}
+
+/* Styles for search-prefix popUp */
+
+#search-prefix {
+    width: 425px;
+    position: absolute;
+    z-index: 100;
+    background-color: #fff;
+    right: 190px;
+    top: 45px;
+    display: none;
+    padding: 0 5px;
+    border-radius: 10px 10px 0 0;
+    border: solid 1px #aaa;
+    height: 532px;
+}
+
+#search-prefix .title {
+    font-size: 20px;
+    text-align: center;
+}
+
+.arrow-up {
+    width: 0;
+    height: 0;
+    border: 11px solid transparent;
+    border-bottom-color: #aaa;
+    border-top: 0;
+    position: absolute;
+    top: -12px;
+    right: 216px;
+    z-index: 100;
 }

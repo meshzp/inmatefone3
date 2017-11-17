@@ -14,12 +14,13 @@
     },
     "minimum-stability": "dev",
     "require": {
-        "php": ">=5.4.0",
+        "php": ">=7.1.0",
         "yiisoft/yii2": "~2.0.6",
         "yiisoft/yii2-bootstrap": "~2.0.0",
-        "vityachis/yii2-tickets": "dev-master",
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
-        "dieruckus/yii2-rbac-admin": "dev-master"
+        "dieruckus/yii2-rbac-admin": "dev-master",
+        "vityachis/yii2-tickets": "dev-master",
+        "kartik-v/yii2-nav-x": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",
@@ -34,8 +35,8 @@
         "discard-changes": "true",
         "bitbucket-oauth": {
             "bitbucket.org": {
-                "consumer-key": "SWcjADNfDWn6XGGZV5",
-                "consumer-secret": "5rF4u44sYZTvtQgnuxDcZ2DucuWVgz2a"
+                "consumer-key": "tJcwsDhnwqcUjLuFng",
+                "consumer-secret": "LaS8k229xVKenpLfRnrRxW8DvYXrJtJg"
             }
         }
     },

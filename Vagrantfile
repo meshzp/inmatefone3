@@ -7,9 +7,24 @@ required_plugins.each do |plugin|
 end
 
 domains = {
-  frontend: 'y2aa-frontend.dev',
-  backend:  'y2aa-backend.dev'
+  frontend: 'inmatefone3.dev',
+  backend:  'backend.inmatefone3.dev'
 }
+
+# Check for missing plugins
+required_plugins = %w( vagrant-share vagrant-hostmanager vagrant-vbguest )
+plugin_installed = false
+required_plugins.each do |plugin|
+  unless Vagrant.has_plugin?(plugin)
+    system "vagrant plugin install #{plugin}"
+    plugin_installed = true
+  end
+end
+
+# If new plugins installed, restart Vagrant process
+if plugin_installed === true
+  exec "vagrant #{ARGV.join' '}"
+end
 
 config = {
   local: './vagrant/config/vagrant-local.yml',
@@ -23,14 +38,15 @@ options = YAML.load_file config[:local]
 
 # check github token
 if options['github_token'].nil? || options['github_token'].to_s.length != 40
-  puts "You must place REAL GitHub token into configuration:\n/yii2-app-advanced/vagrant/config/vagrant-local.yml"
+  puts "You must place REAL GitHub token into configuration:\n/vagrant/config/vagrant-local.yml"
   exit
 end
 
 # vagrant configurate
 Vagrant.configure(2) do |config|
   # select the box
-  config.vm.box = 'bento/ubuntu-16.04'
+  config.vm.box = 'centos/7'
+  config.vm.box_version = '1710.01'
 
   # should we ask about box updates?
   config.vm.box_check_update = options['box_check_update']
@@ -53,7 +69,7 @@ Vagrant.configure(2) do |config|
   # network settings
   config.vm.network 'private_network', ip: options['ip']
 
-  # sync: folder 'yii2-app-advanced' (host machine) -> folder '/app' (guest machine)
+  # sync: folder 'Inmatefone3' (host machine) -> folder '/app' (guest machine)
   config.vm.synced_folder './', '/app', owner: 'vagrant', group: 'vagrant'
 
   # disable folder '/vagrant' (guest machine)

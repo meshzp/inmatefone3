@@ -11,7 +11,6 @@ use yii\helpers\Console;
  */
 class Globals
 {
-
     /**
      * @param string $key
      * @param mixed $value
@@ -48,7 +47,10 @@ class Globals
     /**
      * @deprecated
      * Shortcut to strip everything but numbers from a string
+     *
      * @param string $number The string
+     * @param string $extraCharacters
+     *
      * @return string The formatted string containing numbers only
      */
     public static function numbersOnly($number, $extraCharacters = '')
@@ -110,18 +112,53 @@ class Globals
             : Yii::$app->request->csrfParam . '=' . Yii::$app->request->csrfToken;
     }
 
-    public static function unique_md5()
+    /**
+     * @deprecated
+     * @return string
+     */
+    public static function uniqueMd5()
     {
         mt_srand(microtime(true) * 100000 + memory_get_usage(true));
 
         return md5(uniqid(mt_rand(), true));
     }
 
+    /**
+     * @deprecated
+     * @return bool
+     */
     public static function cardAccess()
     {
         $allowedUsers = ['system', 'raviv', 'luis', 'oz', 'kate', 'steve', 'arie'];
-        $userName = @user()->name;
+        $userName = @self::user()->name;
 
         return in_array($userName, $allowedUsers);
+    }
+
+    /**
+     * TODO: It is not clear how to correctly change this method
+     * @deprecated
+     * @return stdClass
+     */
+    public static function user()
+    {
+        // return system user if we are in the console
+        if (Yii::app() instanceof CConsoleApplication) {
+            // allow console commands and related models to fetch the user id
+            $user     = new stdClass();
+            $user->id = 1;
+
+            return $user;
+        }
+        // return client user if we are in a consumer site
+        if (!SITE_ADMIN) {
+            // allow consumer sites and related models to fetch the user id as client
+            $user     = new stdClass();
+            $user->id = 0;
+
+            return $user;
+        }
+
+        return Yii::app()->getUser();
     }
 }
