@@ -55,7 +55,7 @@ class Globals
      */
     public static function numbersOnly($number, $extraCharacters = '')
     {
-        return preg_replace('/[^0-9' . $extraCharacters . ']/', '', $number);
+        return preg_replace("/[^0-9$extraCharacters]/", "", $number);
     }
 
     /**
