@@ -1,11 +1,11 @@
 <?php
 namespace backend\controllers;
 
+use dieruckus\rbacadmin\models\TwoFactorAuthForm;
 use Yii;
-use yii\web\Controller;
-use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use common\models\LoginForm;
+use yii\filters\VerbFilter;
+use yii\web\Controller;
 
 /**
  * Site controller
@@ -74,7 +74,7 @@ class SiteController extends Controller
             return $this->goHome();
         }
 
-        $model = new LoginForm();
+        $model = new TwoFactorAuthForm(['scenario' => TwoFactorAuthForm::SCENARIO_LOGIN]);
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
             return $this->goBack();
         } else {
